@@ -20,72 +20,78 @@ st.markdown("---")
 # --- 分圧回路の図解を生成して表示 ---
 st.subheader("📊 分圧回路のイメージ")
 
-# 画像を作成 (幅800, 高さ400)
-width, height = 800, 400
+# 画像を作成 (幅800, 高さ450に少し高く設定)
+width, height = 800, 450
 image = Image.new('RGB', (width, height), '#f9f9f9')
 draw = ImageDraw.Draw(image)
 
-# フォントの設定 (システム標準のゴシック体)
+# フォントの設定 (システム標準のゴシック体を大きく設定)
 try:
-    font_lg = ImageFont.truetype("arial.ttf", 28)
-    font_md = ImageFont.truetype("arial.ttf", 22)
-    font_sm = ImageFont.truetype("arial.ttf", 18)
+    # 緒方仕様：以前の2倍程度の大きさに設定
+    font_xl = ImageFont.truetype("arial.ttf", 55) # V-in, V-outなど
+    font_lg = ImageFont.truetype("arial.ttf", 45) # R1, R2, GND
+    font_md = ImageFont.truetype("arial.ttf", 30) # 計算式
 except:
+    # フォントが読み込めない場合のフォールバック（Streamlit Cloudなど）
+    font_xl = ImageFont.load_default()
     font_lg = ImageFont.load_default()
     font_md = ImageFont.load_default()
-    font_sm = ImageFont.load_default()
 
 # 線の色
 line_color = '#333'
-label_color = '#1E90FF' # 青
+label_color = '#1E90FF' # 青（視認性の高い色に変更）
 res_color = '#444'     # 抵抗
 
-# 回路の描画
-x_left = 200
-x_right = 600
-y_top = 80
-y_mid = 200
-y_bot = 320
+# 回路の描画位置調整
+x_left = 180  # R1, R2ラベル用スペース確保
+x_right = 650 # V-in, V-outラベル用スペース確保
+y_top = 100
+y_mid = 225
+y_bot = 350
 
 # 電源ライン
-draw.line((x_left, y_top, x_right, y_top), fill=line_color, width=3) # V-in
+draw.line((x_left, y_top, x_right, y_top), fill=line_color, width=4) # V-in
 # グランドライン
-draw.line((x_left, y_bot, x_right, y_bot), fill=line_color, width=3) # GND
+draw.line((x_left, y_bot, x_right, y_bot), fill=line_color, width=4) # GND
 
-# 抵抗の描画
-res_w = 40
-res_h = 60
+# 抵抗の描画 (サイズを少し大きく)
+res_w = 50
+res_h = 70
 
 # R1
-draw.rectangle((x_left - res_w/2, y_mid - res_h*1.2, x_left + res_w/2, y_mid - res_h*0.2), fill=res_color)
+draw.rectangle((x_left - res_w/2, y_mid - res_h*1.3, x_left + res_w/2, y_mid - res_h*0.3), fill=res_color)
 # R2
-draw.rectangle((x_left - res_w/2, y_mid + res_h*0.2, x_left + res_w/2, y_mid + res_h*1.2), fill=res_color)
+draw.rectangle((x_left - res_w/2, y_mid + res_h*0.3, x_left + res_w/2, y_mid + res_h*1.3), fill=res_color)
 
 # 接続線
-draw.line((x_left, y_top, x_left, y_mid - res_h*1.2), fill=line_color, width=2) # V-in to R1
-draw.line((x_left, y_mid - res_h*0.2, x_left, y_mid + res_h*0.2), fill=line_color, width=2) # R1 to R2
-draw.line((x_left, y_mid + res_h*1.2, x_left, y_bot), fill=line_color, width=2) # R2 to GND
+draw.line((x_left, y_top, x_left, y_mid - res_h*1.3), fill=line_color, width=3) # V-in to R1
+draw.line((x_left, y_mid - res_h*0.3, x_left, y_mid + res_h*0.3), fill=line_color, width=3) # R1 to R2
+draw.line((x_left, y_mid + res_h*1.3, x_left, y_bot), fill=line_color, width=3) # R2 to GND
 
 # 出力線
-draw.line((x_left, y_mid, x_right, y_mid), fill=line_color, width=2) # Mid to V-out
+draw.line((x_left, y_mid, x_right, y_mid), fill=line_color, width=3) # Mid to V-out
 
 # グランドシンボル
-draw.line((x_right - 40, y_bot, x_right + 40, y_bot), fill=line_color, width=2)
-draw.line((x_right - 25, y_bot + 10, x_right + 25, y_bot + 10), fill=line_color, width=2)
-draw.line((x_right - 10, y_bot + 20, x_right + 10, y_bot + 20), fill=line_color, width=2)
+draw.line((x_right - 40, y_bot, x_right + 40, y_bot), fill=line_color, width=3)
+draw.line((x_right - 25, y_bot + 12, x_right + 25, y_bot + 12), fill=line_color, width=3)
+draw.line((x_right - 10, y_bot + 24, x_right + 10, y_bot + 24), fill=line_color, width=3)
 
-# ラベルの追加
-# 電圧
-draw.text((x_right - 100, y_top - 40), "V-in (入力電圧)", fill=label_color, font=font_lg)
-draw.text((x_right - 100, y_mid - 40), "V-out (出力電圧)", fill=label_color, font=font_lg)
-draw.text((x_right - 50, y_bot + 30), "GND", fill=line_color, font=font_lg)
+# --- ラベルの追加 (特大フォント) ---
 
-# 抵抗
-draw.text((x_left - 100, y_mid - res_h*0.8), "R1", fill=line_color, font=font_lg)
-draw.text((x_left - 100, y_mid + res_h*0.5), "R2", fill=line_color, font=font_lg)
+# R1, R2ラベル (左側、大きく)
+draw.text((x_left - 130, y_mid - res_h - 20), "R1", fill=line_color, font=font_lg)
+draw.text((x_left - 130, y_mid + res_h*0.3 + 10), "R2", fill=line_color, font=font_lg)
 
-# 計算式のテキスト
-draw.text((x_left + 150, height - 70), "V-out = V-in × R2 / (R1 + R2)", fill='#555', font=font_md)
+# V-in, V-outラベル (右側、特大・青色で強調)
+# テキストのベースライン合わせで座標を微調整
+draw.text((x_right - 230, y_top - 65), "V-in", fill=label_color, font=font_xl)
+draw.text((x_right - 230, y_mid - 65), "V-out", fill=label_color, font=font_xl)
+
+# GNDラベル (右下、大きく)
+draw.text((x_right - 60, y_bot + 35), "GND", fill=line_color, font=font_lg)
+
+# 計算式のテキスト (下部、見やすく)
+draw.text((width/2 - 250, height - 40), "V-out = V-in × R2 / (R1 + R2)", fill='#555', font=font_md)
 
 st.image(image, use_column_width=True)
 
@@ -112,4 +118,4 @@ st.metric("出力電圧 V-out (V)", f"{v_out:.3f} V")
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("---")
-st.caption("※分圧後のV-outは、V-inとGNDの間の電位差となります。")
+st.caption("※分圧後のV-outは、V-inとGNDの間の電位差となります。GNDレベルの変動には注意してください。")
